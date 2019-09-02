@@ -1,0 +1,102 @@
+\documentclass[12pt]{article}
+
+% Packages:
+\usepackage{graphicx}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{subfiles}
+\usepackage{outlines}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage{enumerate}
+\usepackage{subfiles}
+\usepackage{color, colortbl, xcolor}
+\usepackage{multicol}
+%---
+
+% Options:
+\setstretch{1} % Espaçamento entre linhas
+\usepackage[top=3cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\PassOptionsToPackage{hyphens}{url}
+\title{}
+\date{}
+
+% Code customization:
+% Default fixed font does not support bold face
+\DeclareFixedFont{\ttb}{T1}{txtt}{bx}{n}{10} % for bold
+\DeclareFixedFont{\ttm}{T1}{txtt}{m}{n}{10}  % for normal
+
+\lstset{
+	basicstyle=\footnotesize,
+	columns=fullflexible,
+    keywordstyle=\ttb\color{blue},
+	stringstyle=\ttm\color{green},
+	commentstyle=\color{gray},
+	frame=None,
+	breaklines=true,
+	showstringspaces=false,
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+}
+
+\lstdefinestyle{R} {
+	language=R,
+	keywordstyle=\ttb\color{blue},      % keyword style
+	stringstyle=\ttm\color{purple},     % string literal style
+	deletekeywords ={seq,end},
+	frame=single,
+	numbers=left
+}
+
+%---
+% Document:
+\begin{document}
+	% Cabeçalho:
+\begin{figure}
+		\begin{minipage}{.3\linewidth}
+			\centering
+			\includegraphics[width=.6\linewidth]{imgs/ufpa.jpg}
+		\end{minipage}
+		\begin{minipage}{.70\linewidth}
+			\flushleft
+			\paragraph{}
+			\textbf{ }\newline
+			\textbf{UNIVERSIDADE FEDERAL DO PARÁ} \newline
+			\textbf{INSTITUTO DE TECNOLOGIA} \newline
+			\textbf{FACULDADE DE ENGENHARIA DA COMPUTAÇÃO E TELECOMUNICAÇÕES} \newline
+			\textbf{TE05205 - Top. Especiais em Engenharia de Computação II} \newline
+            \textbf{Prof. Dr. Roberto Celio Limão de Oliveira} \newline
+            \textbf{Aluna: Camila Novaes Silva (201606840055)}
+		\end{minipage}
+\end{figure}
+\FloatBarrier
+\begin{center}
+    {\Large \textbf{Algoritmos Genéticos}}
+\end{center}
+%%%%%%%%%%%%%
+
+\section{Introdução}
+
+
+\section{Características e Componentes}
+Um algoritimo genetico simples consiste em, primeiramente, inicializar uma população de
+possíveis soluções. Posteriormente, cruzar dois indivíduos da população para gerar novos
+indivíduos,
+
+\section{Seleção}
+
+\section{Operadores Genéticos}
+
+\section{Exemplo de AG: Container de frutas}
+
+\section{Conclusão}
+
+
+
+\end{document}
