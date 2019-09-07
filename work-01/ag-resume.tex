@@ -82,7 +82,7 @@
 %%%%%%%%%%%%%
 
 \section{Introdução}
-Algoritmos genéticos são uma classe particular de algoritmo evolutivo que usam técnicas
+Algoritmos genéticos (AG) são uma classe particular de algoritmo evolutivo que usam técnicas
 inspiradas pela biologia evolutiva. Esses algoritmos são muito eficientes para busca de
 soluções ótimas, ou aproximadamente ótima em uma grande variedade de problemas.
 
@@ -167,11 +167,44 @@ Alguns dos principais operadores genéticos, são:
 \end{enumerate}
 
 \section{Exemplo de AG: Container de frutas}
+Para exemplificar a utilização de algoritimos genéticos para um problema de ótimização, foi
+feita a implementação de um algoritimo para determinar o número de frutas de cada tipo que um
+container pode carregar de forma a alcançar o maior valor de carregamento, sem ultrapassar o
+peso máximo de 500 e respeitando o mínimo de frutas de 4 unidades.
 
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\rowcolor{gray}
+		Fruta & Peso & Valor \\ \hline
+		 Limão & 2 & 3 \\ \hline
+		 Laranja & 4 & 6 \\ \hline
+		 Mamão & 5 & 10 \\ \hline
+		 Abacaxi & 8 & 18 \\ \hline
+		 Melancia & 12 & 26 \\ \hline
+	\end{tabular}
+	\caption{Relação de frutas, peso e valor\label{tb:container-de-fruta}}
+\end{table}
 
+Dessa forma, utilizando as informações da tabela~\ref{tb:container-de-fruta} foi desenvolvido
+um algoritmo com uma população de 2000 indivíduos, onde cada cromossomo é um vetor de 6 posições,
+uma posição para cada fruta e 1 posição para o fitness. O torneio foi utilizado como algoritimo de
+seleção, usando uma taxa de cruzamento de 50\%, e o algoritimo de ponto de corte foi utilizado
+para cruzamento. Também, foi utilizado uma taxa de mutação de 3\%. Por fim, a condição de parada
+utilizada foi de 30 gerações.
 
-\section{Conclusão}
+\begin{figure*}[htb]
+	\begin{center}
+	\includegraphics[width=0.6\textwidth]{./imgs/result-ag.eps}
+	\caption{Resultado do AG para o problema de dimensionamento de container.\label{fig:result}}
+	\end{center}
+\end{figure*}
 
+O resultado obtido pode ser visualizado na Fig.~\ref{fig:result}, onde a linha vermelha representa
+a \textit{fitness} do melhor indivíduo ao longo das gerações e a linha azul, a média do \textit{fitness}
+de todos os indivíduos da população. O resultado final foi: 13 limões, 4 laranjas, 10 mamãoes, 45 abacaxis
+e 4 melancias.
 
 
 \end{document}
