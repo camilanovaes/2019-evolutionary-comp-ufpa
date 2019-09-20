@@ -28,12 +28,11 @@
 
 # ## TODO:
 # - [x] Mudar forma de gerar a população inicial. Sortear de 0 a 1, se for maior de 0.5 setar pra 1 e se for menor setar pra 0.
-# - [ ] Debugar o método de seleção e cruzamento: Seleção me parece ok, o cruzamento tá errado, tenho que selecionar dois pais, testar a taxa de cruzamento (<75%) e cruzar usando um número aleatório para o ponto de cruzamento. 
-# - [ ] Usar mesma população inicial para todos os experimentos.
-# - [ ] Arrumar a seleção
-# - [ ] Arrumar a mutação -> Tem que ser feita gene a gene.
-# - [ ] Arrumar o cruzamento
-# - [ ] Rodar 50 experimentos
+# - [x] Debugar o método de seleção e cruzamento: Seleção (agr estamos selecionando todos os pais de uma vez ao invés de selecionar dois e fazer o cruzamento), o cruzamento tá errado, tenho que selecionar dois pais, testar a taxa de cruzamento (<75%) para cada pai e cruzar usando um número aleatório para o ponto de cruzamento.
+# - [x] Usar mesma população inicial para todos os experimentos.
+# - [x] Arrumar a mutação -> Tem que ser feita gene a gene.
+# - [x] Arrumar o cruzamento
+# - [x] Rodar 50 experimentos
 # - [ ] Plotar grafico com todas as médias da população.
 # - [ ] Plotar gráfico com todos os melhores indivíduos.
 # - [ ] Plotar grafico com a média da média do melhor indivíduo.
@@ -46,6 +45,7 @@
 import numpy as np
 import random
 from math import sin, pi, sqrt
+import time, argparse
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -64,8 +64,8 @@ def initialize(size):
 
     Returns:
         Numpy matrix with the population
-    """
 
+    """
     population = np.zeros((size,51))
 
     for chrom in population:
@@ -82,8 +82,8 @@ def decode(binary):
 
     Args:
         binary : Binary vector to decode
-    """
 
+    """
     x_bin  = ''.join(str(int(d)) for d in binary)
     x_int  = int(x_bin, 2)
     x_real = np.array(-100 + (x_int * (200/(2**25 - 1)))).round(decimals=5)
@@ -111,12 +111,11 @@ def selection(population):
 
     Args:
         population : Matrix with all population
-        tx         : Selection rate
 
     Return:
         Parents selected to reproduce
-    """
 
+    """
     size          = len(population)
     # pop       = population.copy()
     parents       = np.zeros([size, population.shape[1]])
@@ -134,8 +133,6 @@ def selection(population):
                 parents[i] = chrom
                 break
 
-        # childrens[i:i+2] = crossover(parents, tc, tm)
-
     return parents
 
 def crossover(parents, tc, tm):
@@ -143,23 +140,29 @@ def crossover(parents, tc, tm):
 
     Args:
         parents: Matrix with selected parents
+        tc     : Crossover rate
+        tm     : Mutation rate
 
     Returns:
         Vector with generated children
+
     """
-    n_genes       = parents.shape[1]
-    children      = parents.copy()
+    n_genes   = parents.shape[1]
+    children  = parents.copy()
 
     for i in range(0, len(parents), 2):
+        # Select a random point for single-point crossover
         point = np.random.randint(0, n_genes - 1)
-        crossover_rate_1 = np.random.randint(0,100)
-        crossover_rate_2 = np.random.randint(0,100)
 
-        if ( crossover_rate_1 < tc*100 and crossover_rate_2 < tc*100):
-            # Continue with the crossover
+        # Select a random number for each parent and compare with the
+        # crossover rate, if both are lower than the crossover rate
+        # apply the crossover. Else, just pass the parents for the new
+        # population.
+        tc_parent_1 = np.random.randint(0,100)
+        tc_parent_2 = np.random.randint(0,100)
+
+        if ( tc_parent_1 < tc*100 and tc_parent_2 < tc*100):
             # Children 1
-            print("Pai1:", children[i])
-            print("Pai2:", children[i+1])
             children[i, :point]   = parents[i+1, :point]
             mutation(children[i, :-1], tm)
             children[i,-1]        = fitness(children[i,:-1])
@@ -169,11 +172,6 @@ def crossover(parents, tc, tm):
             mutation(children[i+1, :-1], tm)
             children[i+1, -1]     = fitness(children[i+1, :-1])
 
-            print("Filho1:", children[i])
-            print("Filho2:", children[i+1])
-        else:
-            print("Sem filhos")
-
     return children
 
 def mutation(children, tm):
@@ -181,9 +179,9 @@ def mutation(children, tm):
 
     Args:
         population : Matrix with all population
-        tx         : Mutation rate
-    """
+        tm         : Mutation rate
 
+    """
     n_genes  = len(children)
     mutation = np.random.sample(n_genes)
 
@@ -191,70 +189,169 @@ def mutation(children, tm):
         if (mutation[i] < tm):
             children[i] = 0 if children[i] else 1
 
-def plot_population(x,y):
+def plot_population(pop, title, exp=0, gen=0):
+    x = [decode(p) for p in pop[:, 0:25]]
+    y = [decode(p) for p in pop[:, 25:50]]
+
+    x_axis = np.arange(-100,100,0.1)
+    y_axis = np.arange(-100,100,0.1)
+
+    X,Y = np.meshgrid(x_axis,y_axis)
+    Z   = f6(X, Y)
+
     plt.figure()
-    plt.scatter(x,y)
-    plt.show()
+    plt.title(title)
+    plt.axis((-100,100,-100,100))
+    plt.contourf(X, Y, Z, 50)
+    plt.scatter(x,y, color='red')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(f"plots/population_gen_{gen}_exp_{exp}", dpi=300)
+
+def plot_function():
+    x_axis = np.arange(-10,10,0.1)
+    y_axis = np.arange(-10,10,0.1)
+
+    X,Y = np.meshgrid(x_axis,y_axis)
+    Z   = f6(X, Y)
+
+    fig  = plt.figure()
+    ax  = plt.axes(projection='3d')
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet)
+    plt.savefig("plots/function", dpi=300)
+
+def plot_fitness_vs_gen(result, type, N, title, file, x_label):
+
+    if (type == "exp-mean"):
+        mean = list()
+
+        for i, exp in enumerate(result):
+            mean.append(np.mean(exp))
+
+        plt.figure()
+        plt.title(title)
+        plt.plot(np.arange(1,N), mean, marker='o', linewidth=0.5, markersize=1)
+        plt.xlabel(x_label)
+        plt.ylabel("Fitness")
+        plt.legend()
+        plt.savefig(file, dpi=300)
+
+    elif (type == "exp-best"):
+        best = list()
+
+        for i, exp in enumerate(result):
+            best.append(np.amax(exp))
+
+        plt.figure()
+        plt.title(title)
+        plt.plot(np.arange(1,N), best, marker='o', linewidth=0.5, markersize=1)
+        plt.xlabel(x_label)
+        plt.ylabel("Fitness")
+        plt.legend()
+        plt.savefig(file, dpi=300)
+
+    elif (type == "gen-mean"):
+        plt.figure()
+        plt.title(title)
+        mean_mean = list()
+
+        for i, exp in enumerate(result):
+            plt.plot(np.arange(1,N), exp, marker='o', linewidth=0.5, markersize=1)
+
+        for i in range(0, N-1):
+            mean_mean.append(np.mean(result[:,i]))
+
+        plt.plot(np.arange(1,N), mean_mean, marker='o', linewidth=1, markersize=1, color='black')
+
+        plt.xlabel(x_label)
+        plt.ylabel("Fitness")
+        plt.legend()
+        plt.savefig(file, dpi=300)
+
+    elif (type == "gen-best"):
+        plt.figure()
+        plt.title(title)
+        mean_best = list()
+
+        for i, exp in enumerate(result):
+            plt.plot(np.arange(1,N), exp, marker='o', linewidth=0.5, markersize=1)
+
+        for i in range(0, N-1):
+            mean_best.append(np.mean(result[:,i]))
+
+        plt.plot(np.arange(1,N), mean_best, marker='o', linewidth=1, markersize=1, color='black')
+
+        plt.xlabel(x_label)
+        plt.ylabel("Fitness")
+        plt.legend()
+        plt.savefig(file, dpi=300)
 
 def main():
-    gen = 100
-    pop = initialize(100)
+    parser = argparse.ArgumentParser(description="AG")
+    parser.add_argument('-f', '--file')
+    parser.add_argument('--function')
+    args     = parser.parse_args()
 
-    print(f"From pop - Best - i:{np.argmax(pop[:, -1])}, v:{np.amax(pop[:, -1])}")
-    fitness = [f for f in pop[:,-1]]
+    if (not args.file):
+        n_gen    = 100
+        n_exp    = 50
+        init_pop = initialize(100)
+        plot_population(init_pop, 'População Inicial')
 
-    x_value = [decode(b) for b in pop[:,0:25]]
-    y_value = [decode(b) for b in pop[:,25:50]]
-    plot_population(x_value, y_value)
+        gen_best = list()
+        gen_mean = list()
 
-    better = np.zeros(gen)
-    mean   = np.zeros(gen)
+        exp_random  = 40
 
-    for i in range(0, gen):
-        print("------------------------------------------\n")
-        print(f"Gen: {i}")
-        parents      = selection(pop)             # Population, tx
-        children     = crossover(parents, 0.75, 0.01)
-        pop          = children
+        for j in range(0, n_exp):
+            g_best = list()
+            g_mean = list()
 
-        better[i]    = np.amax(pop[:, -1])
-        mean[i]      = np.mean(pop[:,-1])
+            # Every experiment will have the same initial population
+            pop = init_pop.copy()
 
-        x_value = [decode(b) for b in pop[:,0:25]]
-        y_value = [decode(b) for b in pop[:,25:50]]
+            for i in range(0, n_gen):
+                print(f"Exp:{j} \t Generation:{i}")
+                parents   = selection(pop)
+                children  = crossover(parents, 0.75, 0.01)
 
-    plt.figure()
-    plt.plot(np.arange(1,gen+1), better, label = 'Better')
-    plt.plot(np.arange(1,gen+1), mean, label = 'Mean')
-    plt.xlabel("Generation")
-    plt.ylabel("Fitness")
-    plt.legend()
-    plt.show()
+                # The new population will be composed just with the childrens
+                pop       = children
 
-    plot_population(x_value, y_value)
+                # Generation results
+                g_best.append(np.amax(pop[:, -1]))
+                g_mean.append(np.mean(pop[:, -1]))
 
-    best = np.argmax(pop[:, -1])
-    x = decode(pop[best,0:25])
-    y = decode(pop[best,25:50])
-    z = pop[best,-1]
+                # Plot the population in a random experiment
+                if (j == exp_random and i in [0, 9, 49, 99]):
+                    plot_population(pop, f"População da geração {i + 1}, experimento {j + 1}", exp=j, gen=i)
 
-    print(f'Best: x:{x:.2f}, y:{y:.2f}, f(x,y):{z:.2f}')
+            # Generations results
+            gen_best.append(g_best)
+            gen_mean.append(g_mean)
+
+        filename = "ag-" + time.strftime("%Y%m%d-%H%M%S") + ".npz"
+        np.savez_compressed(filename,
+                            gen_best=gen_best, gen_mean=gen_mean)
+
+    else:
+        fd       = np.load(args.file)
+
+        gen_best = fd['gen_best']
+        gen_mean = fd['gen_mean']
+
+        plot_fitness_vs_gen(gen_best, type='gen-best', N=101, title="Melhores indivíduos por geração nos 50 experimentos",
+                            file="plots/fitness_vs_exp_best", x_label="Gerações")
+        plot_fitness_vs_gen(gen_mean, type='gen-mean', N=101, title="Média da população por geração nos 50 experimentos",
+                            file="plots/fitness_vs_exp_mean", x_label="Gerações")
+
+        plot_fitness_vs_gen(gen_best, type='exp-best', N=51, title="Melhor indivíduo por experimento",
+                            file="plots/fitness_vs_best", x_label="Experimentos")
+        plot_fitness_vs_gen(gen_mean, type='exp-mean',N=51, title="Média da população por experimento",
+                            file="plots/fitness_vs_mean", x_label="Experimentos")
+
+        plot_function()
 
 if __name__ == "__main__":
     main()
-
-# x_axis = np.arange(-10,10,0.1)
-# y_axis = np.arange(-10,10,0.1)
-
-# X,Y = np.meshgrid(x_axis,y_axis)
-# Z   = f6(X, Y)
-
-# plt.figure()
-# plt.contour(X, Y, Z, 20, cmap=cm.jet)
-# plt.show()
-
-# fig  = plt.figure()
-# ax  = plt.axes(projection='3d')
-# ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet)
-# plt.show()
 
