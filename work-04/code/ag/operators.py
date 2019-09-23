@@ -1,4 +1,5 @@
 import random
+import copy
 
 class Operator():
     def __init__(self, tc, tm):
@@ -38,7 +39,7 @@ class Operator():
 
         """
         N_genes  = parents[0].size # Chromosome size
-        children = parents.copy()
+        children = [copy.deepcopy(c) for c in parents]
 
         for i in range(0, len(parents), 2):
             # Select a random point for single-point crossover

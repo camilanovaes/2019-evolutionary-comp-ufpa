@@ -5,12 +5,13 @@ class Chromosome():
     def __init__(self, size, config, type="binary", r_max=1, r_min=0):
         """
         """
-        self.bits    = []
-        self.fitness = None
-        self.size    = size
-        self.config  = config
-        self.r_max   = r_max
-        self.r_min   = r_min
+        self.bits     = []
+        self.fitness  = None
+        self.aptitude = None
+        self.size     = size
+        self.config   = config
+        self.r_max    = r_max
+        self.r_min    = r_min
 
         if (type == "binary"):
             for i in range(0, size):
@@ -68,4 +69,5 @@ class Chromosome():
         Y = self.decoder(self.bits[p:p*2])
         z = f(X,Y)
 
-        self.fitness = z
+        self.fitness  = z
+        self.aptitude = self.fitness
