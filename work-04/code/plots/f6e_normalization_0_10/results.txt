@@ -1,2 +1,0 @@
-Média do melhor indivíduo: fitness = 999.9676360989922
-Média da média da população: fitness = 999.8224913025118

@@ -5,7 +5,7 @@ class Selection():
         self.data = population
         self.N    = None
 
-    def _linear_normalization(self, v_max=1000, v_min=0):
+    def _linear_normalization(self, v_min=20, v_max=60):
         """
 
         Args:
