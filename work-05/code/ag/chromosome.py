@@ -2,29 +2,36 @@ import numpy as np
 import random
 
 class Chromosome():
-    def __init__(self, size, config, type="binary", r_max=1, r_min=0):
+    def __init__(self, size, config):
         """
         """
         self.bits     = []
+        self.type     = config["rep_type"]
         self.fitness  = None
         self.aptitude = None
         self.size     = size
         self.config   = config
-        self.r_max    = r_max
-        self.r_min    = r_min
+        self.r_max    = config["max"]
+        self.r_min    = config["min"]
 
-        if (type == "binary"):
+        if (self.type == "binary"):
             for i in range(0, size):
                 self.bits.append(random.randint(0, 1))
+        elif (self.type == "real"):
+            for i in range(0, size):
+                self.bits.append(random.uniform(self.r_min, self.r_max))
         else:
-            raise ValueError(f"Type {type} not defined")
+            raise ValueError(f"Type {self.type} not defined")
 
         # Calculate fitness
         self.eval_fitness()
 
 
     def __str__(self):
-        bits = ''.join(map(str, self.bits))
+        if (self.type == "binary"):
+            bits = ''.join(map(str, self.bits))
+        else:
+            bits = self.bits
 
         return f'{bits}, {self.fitness}'
 
@@ -64,10 +71,18 @@ class Chromosome():
         """
         p = self.config["precision_bits"]
         f = self.config["f"]
+        z = 0
 
-        X = self.decoder(self.bits[0:p])
-        Y = self.decoder(self.bits[p:p*2])
-        z = f(X,Y)
+        if (self.type == "binary"):
+            X = self.decoder(self.bits[0:p])
+            Y = self.decoder(self.bits[p:p*2])
+            z = f(X,Y)
+
+        elif (self.type == "real"):
+            for i in range(0, self.size - 1):
+                X  = self.bits[i]
+                Y  = self.bits[i+1]
+                z += f(X,Y)
 
         self.fitness  = z
         self.aptitude = self.fitness

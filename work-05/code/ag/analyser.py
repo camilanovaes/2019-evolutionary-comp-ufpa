@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Analyser():
-    def __init__(self, data):
+    def __init__(self, data, epoch):
         """
 
         Args:
             data :
         """
-        self.data = data
+        self.data  = data
+        self.epoch = epoch
 
     def plot_fitness_vs_gen(self, type, show_mean=True, show_std=True,
                             show_chromosomes=True, results=True, save=True):
@@ -79,6 +80,12 @@ class Analyser():
                 result = np.amax(mean)
                 print(f"{label}: fitness = {result}")
 
+                with open('plots/info.txt', 'a') as fd:
+                    fd.write(f"epoch: {self.epoch}\n")
+                    fd.write(f"{label}: fitness = {result}\n")
+                    fd.write("\n")
+
+
         plt.title(title)
         plt.xlabel("Gerações")
         plt.ylabel("Fitness")
@@ -86,7 +93,7 @@ class Analyser():
         plt.legend()
 
         if (save):
-            plt.savefig(f"plots/fitness_vs_gen_{type}", dpi=300)
+            plt.savefig(f"plots/{self.epoch}_fitness_vs_gen_{type}", dpi=300)
         else:
             plt.show()
 
@@ -100,18 +107,23 @@ class Analyser():
             save   :
 
         """
-        f     = config['f']
-        v_max = config['max']
-        v_min = config['min']
-        b     = config['precision_bits']
+        f         = config['f']
+        v_max     = config['max']
+        v_min     = config['min']
+        b         = config['precision_bits']
+        rep_type  = config['rep_type']
 
         n_exp = exp - 1
         n_gen = gen - 1
 
         pop = self.data[n_exp][n_gen]
 
-        x = [chromo.decoder(chromo.bits[:b]) for chromo in pop]
-        y = [chromo.decoder(chromo.bits[b:]) for chromo in pop]
+        if (rep_type == "binary"):
+            x = [chromo.decoder(chromo.bits[:b]) for chromo in pop]
+            y = [chromo.decoder(chromo.bits[b:]) for chromo in pop]
+        else:
+            x = [chromo.bits[0] for chromo in pop]
+            y = [chromo.bits[1] for chromo in pop]
 
         x_axis = np.arange(v_min,v_max,0.1)
         y_axis = np.arange(v_min,v_max,0.1)
@@ -129,7 +141,7 @@ class Analyser():
         plt.ylabel('y')
 
         if (save):
-            plt.savefig(f"plots/population_gen_{gen}_exp_{exp}", dpi=300)
+            plt.savefig(f"plots/{self.epoch}_population_gen_{gen}_exp_{exp}", dpi=300)
         else:
             plt.show()
 

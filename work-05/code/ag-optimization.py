@@ -6,10 +6,6 @@ import numpy as np
 import time, copy
 import random
 
-# Define datasets
-init_pop    = list()
-experiments = list()
-
 # Define evaluated function
 def f6(x,y):
     temp_1 = np.sin(np.sqrt(x**2 + y**2))
@@ -22,10 +18,11 @@ def f6_e(x,y):
     return 999.5 - ((temp_1**2 - 0.5)/(temp_2**2))
 
 # Configuration parameters
-config = {"f"              : f6_e,
+config = {"f"              : f6,
           "max"            : 100,
           "min"            : -100,
-          "precision_bits" : 25}
+          "precision_bits" : 25,
+          "rep_type"       : "binary"}
 
 # General Parameters
 N_pop      = 100    # Population size
@@ -34,52 +31,60 @@ N_gen      = 100    # Number of generations
 N_exp      = 50     # Number of experiments
 tc         = 0.75   # Crossover rate
 tm         = 0.01   # Mutation rate
-N_children = N_pop  # Number of new children
+gap        = 0.2    # Stationary rate
+N_epoch    = 5
 
-# Generate the initial population
-for i in range(N_pop):
-    chrom = ag.chromosome.Chromosome(chrom_size, config)
-    init_pop.append(chrom)
+for k in range(N_epoch):
+    # Define datasets
+    init_pop    = list()
+    experiments = list()
 
-# Run Experiments
-for j in range(N_exp):
-    print(f'Experiment: {j}')
-    # Make a copy of initial population
-    pop         = copy.deepcopy(init_pop)
+    # Generate the initial population
+    for i in range(N_pop):
+        chrom = ag.chromosome.Chromosome(chrom_size, config)
+        init_pop.append(chrom)
 
-    # Initialize generation list
-    generations = []
+    # Run Experiments
+    for j in range(N_exp):
+        print(f'Experiment: {j}')
+        # Make a copy of initial population
+        pop         = copy.deepcopy(init_pop)
 
-    # Run generations
-    for i in range(N_gen):
-        # Save the population
-        generations.append(pop)
+        # Initialize generation list
+        generations = []
 
-        # Apply selection
-        selection = ag.selection.Selection(pop)
-        parents   = selection.process(N=N_children, type="linear-normalization")
+        # Run generations
+        for i in range(N_gen):
+            # Save the population
+            generations.append(pop)
 
-        # Apply genetic operators: Crossover and mutation
-        operator  = ag.operators.Operator(tc=tc, tm=tm)
-        children  = operator.process(parents,
-                                     crossover="single-point",
-                                     mutation="binary-inversion")
+            # Apply selection
+            selection = ag.selection.Selection(pop)
+            parents   = selection.process(type="proportional",
+                                          technique="elitist", gap=gap)
 
-        # Replace the entire population with the children
-        pop       = children
+            # Apply genetic operators: Crossover and mutation
+            operator  = ag.operators.Operator(config=config, tc=tc, tm=tm)
+            children  = operator.process(parents,
+                                         crossover = "point",
+                                         n_point   = 1,
+                                         mutation  = "binary-inversion")
 
-    # Save the experiments results
-    experiments.append(generations)
+            # Replace the population with the generated children
+            pop       = selection.replace(pop, children)
 
-# Plot results
-analyser = ag.analyser.Analyser(experiments)
-analyser.plot_fitness_vs_gen(type="best")
-analyser.plot_fitness_vs_gen(type="pop")
+        # Save the experiments results
+        experiments.append(generations)
 
-# Plot population in diferentes generations in a random experiment
-n_gen = 40
-analyser.plot_population(config, exp=n_gen, gen=1)
-analyser.plot_population(config, exp=n_gen, gen=10)
-analyser.plot_population(config, exp=n_gen, gen=50)
-analyser.plot_population(config, exp=n_gen, gen=100)
+    # Plot results
+    analyser = ag.analyser.Analyser(experiments, epoch=k)
+    analyser.plot_fitness_vs_gen(type="best")
+    analyser.plot_fitness_vs_gen(type="pop")
+
+    # Plot population in diferentes generations in a random experiment
+    n_exp = 40
+    analyser.plot_population(config, exp=n_exp, gen=1)
+    analyser.plot_population(config, exp=n_exp, gen=10)
+    analyser.plot_population(config, exp=n_exp, gen=50)
+    analyser.plot_population(config, exp=n_exp, gen=100)
 

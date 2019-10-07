@@ -1,11 +1,12 @@
-import random
+import random, copy
 
 class Selection():
     def __init__(self, population):
-        self.data = population
-        self.N    = None
+        self.data     = population
+        self.N        = None
+        self.N_retain = None
 
-    def _linear_normalization(self, v_min=20, v_max=60):
+    def _linear_normalization(self, v_min=1, v_max=10):
         """
 
         Args:
@@ -45,15 +46,49 @@ class Selection():
 
         return parents
 
-    def process(self, N, type="proportional"):
+    def replace(self, pop, children):
+        """
+        """
+        pop.sort(key=lambda x: x.aptitude, reverse=True)
+
+        new_pop                 = copy.deepcopy(pop)
+        new_pop[self.N_retain:] = children
+        random.shuffle(new_pop)
+
+        return new_pop
+
+    def process(self, type="proportional", technique="none", gap = 0):
         """
 
         Args:
-            N    : Number of parents to select
-            type : Selection algorithm
+            type      : Selection algorithm
+            technique :
+            gap       :
+
         """
-        # Defube number of parents to be selected
-        self.N = N
+
+        if (technique == "elitist"):
+            N_pop         = len(self.data)
+            self.N        = N_pop - 1
+            self.N_retain = 1
+
+        elif (technique == "stationary"):
+            N_pop   = len(self.data)
+            N_child = round(N_pop*gap)
+
+            if (N_child < 0):
+                N_child = 1
+
+            self.N        = N_child
+            self.N_retain = N_pop - N_child
+
+        elif (technique == "none"):
+            N_pop         = len(self.data)
+            self.N        = N_pop
+            self.N_retain = 0
+
+        else:
+            raise ValueError(f"Technique {technique} not defined")
 
         if (type == "proportional"):
             parents = self._proportional()
