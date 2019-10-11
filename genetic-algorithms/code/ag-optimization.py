@@ -28,11 +28,11 @@ config = {"f"              : f6,
 N_pop      = 100    # Population size
 chrom_size = 50     # Chromosome size
 N_gen      = 100    # Number of generations
-N_exp      = 50     # Number of experiments
+N_exp      = 1     # Number of experiments
 tc         = 0.75   # Crossover rate
 tm         = 0.01   # Mutation rate
 gap        = 0.2    # Stationary rate
-N_epoch    = 5
+N_epoch    = 1
 
 for k in range(N_epoch):
     # Define datasets
@@ -78,10 +78,12 @@ for k in range(N_epoch):
 
     # Plot results
     analyser = ag.analyser.Analyser(experiments, epoch=k)
-    analyser.plot_fitness_vs_gen(type="best")
-    analyser.plot_fitness_vs_gen(type="pop")
+    analyser.plot(type="best")
+    analyser.plot(type="pop")
+    analyser.plot(type="mdf", show_std=False)
+    analyser.plot(type="hamming", show_std=False)
 
-    # Plot population in diferentes generations in a random experiment
+    # # Plot population in diferentes generations in a random experiment
     n_exp = 40
     analyser.plot_population(config, exp=n_exp, gen=1)
     analyser.plot_population(config, exp=n_exp, gen=10)

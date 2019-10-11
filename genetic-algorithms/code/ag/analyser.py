@@ -11,8 +11,19 @@ class Analyser():
         self.data  = data
         self.epoch = epoch
 
-    def plot_fitness_vs_gen(self, type, show_mean=True, show_std=True,
-                            show_chromosomes=True, results=True, save=True):
+    def hamming_distance(self, gen):
+        hamming = []
+        for i in range(0, len(gen)+1):
+            h_gen = []
+            for j in range(i+1,len(gen)):
+                assert len(gen[i].bits) == len(gen[j].bits)
+                h_gen.append(sum(ch1 != ch2 for ch1, ch2 in zip(gen[i].bits, gen[j].bits)))
+            hamming.append(sum(h_gen))
+
+        return hamming
+
+    def plot(self, type, show_mean=True, show_std=True,
+             show_chromosomes=True, results=True, save=True):
         """
 
         Args:
@@ -24,12 +35,26 @@ class Analyser():
 
         """
         plt_config = {"best": {"title": "Melhor indivíduo",
-                               "label": "Média do melhor indivíduo"},
+                               "label": "Média do melhor indivíduo",
+                               "xlabel": "Gerações",
+                               "ylabel": "Fitness"},
                       "pop" : {"title": "Média da população",
-                               "label": "Média da média da população"}}
+                               "label": "Média da média da população",
+                               "xlabel": "Gerações",
+                               "ylabel": "Fitness"},
+                      "mdf" : {"title": "Medida de diversidade no fenótipo",
+                               "label": "MDF",
+                               "xlabel": "Gerações",
+                               "ylabel": "MDF"},
+                      "hamming" : {"title": "Medida de diversidade no genótipo",
+                               "label": "hamming",
+                               "xlabel": "Gerações",
+                               "ylabel": "Distancia de hamming"}}
 
-        label = plt_config[type]["label"]
-        title = plt_config[type]["title"]
+        label  = plt_config[type]["label"]
+        title  = plt_config[type]["title"]
+        xlabel = plt_config[type]["xlabel"]
+        ylabel = plt_config[type]["ylabel"]
 
         plt.figure()
 
@@ -45,6 +70,12 @@ class Analyser():
                     value = np.amax(fitness)
                 elif (type == "pop"):
                     value = np.mean(fitness)
+                elif (type == "mdf"):
+                    best  = np.amax(fitness)
+                    pop   = np.mean(fitness)
+                    value = pop/best
+                elif (type == "hamming"):
+                    value = np.sum(self.hamming_distance(gen))
                 else:
                     raise ValueError(f"Type {type} not defined")
 
@@ -78,7 +109,7 @@ class Analyser():
                                  label='Desvio padrão')
             if (results):
                 result = np.amax(mean)
-                print(f"{label}: fitness = {result}")
+                print(f"{label}: result = {result}")
 
                 with open('plots/info.txt', 'a') as fd:
                     fd.write(f"epoch: {self.epoch}\n")
@@ -87,8 +118,8 @@ class Analyser():
 
 
         plt.title(title)
-        plt.xlabel("Gerações")
-        plt.ylabel("Fitness")
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
         plt.ticklabel_format(useOffset=False)
         plt.legend()
 
@@ -144,6 +175,3 @@ class Analyser():
             plt.savefig(f"plots/{self.epoch}_population_gen_{gen}_exp_{exp}", dpi=300)
         else:
             plt.show()
-
-    def print_result():
-        pass

@@ -1,0 +1,24 @@
+epoch: 0
+Média do melhor indivíduo: fitness = 0.9627759248499528
+
+epoch: 0
+Média da média da população: fitness = 0.9357477260566165
+
+epoch: 0
+MDF: fitness = 0.9719268069338715
+
+epoch: 0
+MDF: fitness = 268.0
+
+epoch: 0
+Média do melhor indivíduo: fitness = 0.9917927498568575
+
+epoch: 0
+Média da média da população: fitness = 0.8941008858615986
+
+epoch: 0
+MDF: fitness = 0.9015067512818807
+
+epoch: 0
+hamming: fitness = 123866.0
+
