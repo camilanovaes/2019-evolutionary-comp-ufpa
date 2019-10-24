@@ -20,10 +20,12 @@ class Operator():
             ro      :
 
         """
-        children = [copy.deepcopy(c) for c in parents]
+        children =[]
         for i in range(N_lmb):
             parent           = np.random.choice(parents, ro)
+            children.append(parent[0])
             children[i].bits = np.mean([f.bits for f in parent], axis=0)
+            children[i].std  = np.mean([f.std for f in parents])
 
         return children
 

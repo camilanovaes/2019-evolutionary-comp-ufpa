@@ -26,15 +26,15 @@ config = {"f"              : f6,
           "min"            : -100}
 
 # General Parameters
-N_pop      = 5 # Populu_ro_comma_lation size
-chrom_size = 2 # Chromosome size
-N_gen      = 5 # Number of generations
-N_exp      = 2     # Number of experiments
+N_pop      = 1000 # Populu_ro_comma_lation size
+chrom_size = 10 # Chromosome size
+N_gen      = 50 # Number of generations
+N_exp      = 50     # Number of experiments
 N_epoch    = 1
 
-ee_type    = "u_plus_u"
+ee_type    = "u_ro_plus_1"
 N_mi       = N_pop
-N_lmb      = 150
+N_lmb      = 500
 ro         = 3
 
 for k in range(N_epoch):
