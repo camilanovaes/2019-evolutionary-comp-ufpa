@@ -22,6 +22,18 @@ class Analyser():
 
         return hamming
 
+    def euclidian_distance(self, gen):
+        euclidian = []
+        for i in range(0, len(gen)-1):
+            e_gen = []
+            for j in range(i+1, len(gen)):
+                a = np.array(gen[i].bits)
+                b = np.array(gen[j].bits)
+                e_gen.append(np.linalg.norm(a-b))
+            euclidian.append(sum(e_gen))
+
+        return np.sum(euclidian)
+
     def plot(self, type, description, show_mean=True, show_std=True,
              show_chromosomes=True, results=True, save=True):
         """
@@ -47,9 +59,13 @@ class Analyser():
                                "xlabel": "Gerações",
                                "ylabel": "MDF"},
                       "hamming" : {"title": "Medida de diversidade no genótipo",
-                               "label": "hamming",
-                               "xlabel": "Gerações",
-                               "ylabel": "Distancia de hamming"}}
+                                   "label": "hamming",
+                                  "xlabel": "Gerações",
+                                  "ylabel": "Distancia de hamming"},
+                      "euclidian" : {"title": "Medida de diversidade no genótipo",
+                                   "label": "euclidian",
+                                  "xlabel": "Gerações",
+                                  "ylabel": "Distancia de Euclidiana"}}
 
         label  = plt_config[type]["label"]
         title  = plt_config[type]["title"]
@@ -66,6 +82,7 @@ class Analyser():
 
             for gen in exp:
                 fitness = [chrom.fitness for chrom in gen]
+                bits    = np.array([chrom.bits for chrom in gen])
                 if (type == "best"):
                     value = np.amax(fitness)
                 elif (type == "pop"):
@@ -76,6 +93,8 @@ class Analyser():
                     value = pop/best
                 elif (type == "hamming"):
                     value = np.sum(self.hamming_distance(gen))
+                elif (type == "euclidian"):
+                    value = self.euclidian_distance(gen)
                 else:
                     raise ValueError(f"Type {type} not defined")
 

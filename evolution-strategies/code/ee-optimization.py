@@ -26,10 +26,10 @@ config = {"f"              : f6,
           "min"            : -100}
 
 # General Parameters
-N_pop      = 100 # Populu_ro_comma_lation size
-chrom_size = 10 # Chromosome size
-N_gen      = 50 # Number of generations
-N_exp      = 50     # Number of experiments
+N_pop      = 5 # Populu_ro_comma_lation size
+chrom_size = 2 # Chromosome size
+N_gen      = 5 # Number of generations
+N_exp      = 2     # Number of experiments
 N_epoch    = 1
 
 ee_type    = "u_plus_u"
@@ -113,8 +113,8 @@ for k in range(N_epoch):
 analyser = ee.analyser.Analyser(experiments, epoch=k)
 analyser.plot(type="best", description=ee_type)
 analyser.plot(type="pop", description=ee_type)
-#analyser.plot(type="mdf", show_std=False)
-#analyser.plot(type="hamming", show_std=False)
+analyser.plot(type="mdf", show_std=False, description=ee_type)
+analyser.plot(type="euclidian", show_std=False, description=ee_type)
 
 # Plot population in diferentes generations in a random experiment
 #n_exp = 1
