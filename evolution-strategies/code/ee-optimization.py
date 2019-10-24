@@ -28,11 +28,11 @@ config = {"f"              : f6,
 # General Parameters
 N_pop      = 100 # Populu_ro_comma_lation size
 chrom_size = 10 # Chromosome size
-N_gen      = 100# Number of generations
+N_gen      = 50 # Number of generations
 N_exp      = 50     # Number of experiments
 N_epoch    = 1
 
-ee_type    = "u_plus_l"
+ee_type    = "u_plus_u"
 N_mi       = N_pop
 N_lmb      = 150
 ro         = 3
@@ -74,6 +74,12 @@ for k in range(N_epoch):
                 children  = operator.mutation(pop)
                 selection = ee.selection.Selection()
                 pop       = selection.pairwise(pop, children)
+
+            elif (ee_type == "u_plus_u_izidio"):
+                operator  = ee.operators.Operator(config)
+                children  = operator.mutation(pop)
+                selection = ee.selection.Selection()
+                pop       = selection.better(pop, children, N_mi)
 
             elif (ee_type == "u_ro_plus_1"):
                 operator  = ee.operators.Operator(config)
