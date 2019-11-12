@@ -2,6 +2,7 @@ import numpy as np
 from random import randint, uniform
 import copy
 import pdb
+import pso.analyser
 
 
 class Particle():
@@ -48,9 +49,9 @@ def evaluate(f, particle):
         particle.best_p = particle.position
         particle.best_f = particle.fitness
 
-def update_velocity(swarm, particle):
+def update_velocity(swarm, particle, iteration, N_iter, type='canonical'):
     # Parameters
-    w  = 0.5
+    w  = 0
     c1 = 1
     c2 = 2
     r1 = np.random.sample(particle.n_dim)
@@ -58,6 +59,7 @@ def update_velocity(swarm, particle):
     v  = particle.velocity
     p  = particle.best_p
     x  = particle.position
+    k  = iteration
 
     neighbourhood = particle.neighbourhood
 
@@ -71,7 +73,23 @@ def update_velocity(swarm, particle):
         g          = best_p.position
 
     # Velocity
-    new_v = w*v + c1*r1*(p-x) + c2*r2*(g-x)
+    if (type == 'canonical'):
+        new_v = w*v + c1*r1*(p-x) + c2*r2*(g-x)
+
+    elif (type == 'ponderacao-inercia'):
+        w_max = 0.9
+        w_min = 0.4
+        k_max = N_iter
+        c1    = 2
+        c2    = 2
+
+        w = w_max - k*((w_max - w_min)/k_max)
+        print(w)
+        new_v = w*v + c1*r1*(p-x) + c2*r2*(g-x)
+
+    elif (type == 'fator-constricao'):
+        contricao = 0.73
+        new_v = contricao*(v + c1*r1*(p-x) + c2*r2*(g-x))
 
     # Save new velocity
     particle.velocity = new_v
@@ -155,7 +173,7 @@ def main(f, bounds, n_dim, num_particles, max_exp, max_iter, max_epochs, \
     """
     # Run epochs
     swarm_epochs = []
-    for _ in range(0, max_epochs):
+    for k in range(0, max_epochs):
         initial_swarm = []
         for _ in range(0, num_particles):
             initial_swarm.append(Particle(n_dim, bounds))
@@ -169,32 +187,44 @@ def main(f, bounds, n_dim, num_particles, max_exp, max_iter, max_epochs, \
             define_neighbourhoods(swarm, topology)
 
             # Run iterations
+            swarm_iter = []
             for i in range(0, max_iter):
+
                 for j in range(0, num_particles):
                     evaluate(f=f6, particle=swarm[j])
 
+                # Save iterations
+                swarm_iter.append(copy.deepcopy(swarm))
+
                 for j in range(0, num_particles):
                     # Update velocity and position
-                    update_velocity(swarm, swarm[j])
+                    update_velocity(swarm, swarm[j], iteration=i,\
+                                    N_iter=max_iter, \
+                                    type='canonical')
+                            #canonical, ponderacao-inercia, fator-constricao
                     update_position(swarm[j])
 
-                if (verbose):
-                    best = sorted(swarm, key=lambda x: x.fitness, reverse=True)[0]
-                    print(f"Inter: {i}")
-                    print(f"Best: x:{best.position}; f:{best.fitness}")
+            if (verbose):
+                print(f"Epoca: {k}, Exp: {exp}")
 
-            swarm_exp.append(swarm)
-        swarm_epochs.append(swarm_exp)
+            swarm_exp.append(copy.deepcopy(swarm_iter))
+
+    # Plot results
+    analyser = pso.analyser.Analyser(swarm_exp, epoch=k)
+    analyser.plot(type="best", description='pso')
+    analyser.plot(type="pop", description='pso')
+    analyser.plot(type="mdf", show_std=False, description='pso')
+    # analyser.plot(type="euclidian", show_std=False, description='pso')
 
 if __name__ == "__main__":
     main(f             = f6,
          bounds        = [-100,100],
-         n_dim         = 2,
+         n_dim         = 10,
          num_particles = 100,
          max_epochs    = 1,
-         max_exp       = 1,
-         max_iter      = 100,
-         topology      = 'gbest',
+         max_exp       = 50,
+         max_iter      = 150,
+         topology      = 'ring', #gbest, ring, von_neumann
          verbose       = True)
 
 """
